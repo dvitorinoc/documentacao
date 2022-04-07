@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../../img/favicon.ico">
+<title>Receiv Docs</title>
+
+        <link href="../../css/bootstrap-custom.min.css" rel="stylesheet">
+        <link href="../../css/font-awesome.min.css" rel="stylesheet">
+        <link href="../../css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css">
+        <link href="../../extra.css" rel="stylesheet">
+        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!--[if lt IE 9]>
+            <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+            <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        <script src="../../js/jquery-1.10.2.min.js" defer></script>
+        <script src="../../js/bootstrap-3.0.3.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body>
+
+        <div class="navbar navbar-default navbar-fixed-top" role="navigation">
+            <div class="container">
+
+                <!-- Collapsed navigation -->
+                <div class="navbar-header">
+                    <!-- Expander button -->
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+<img src="/img/logo-receiv.png" alt="Receiv" style="height:31px;margin: 10px 5px;" /><span style="color:#fff;">Docs</span><br/>
+
+                </div>
+
+                <!-- Expanded navigation -->
+                <div class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li >
+                                <a href="../..">Receiv Docs</a>
+                            </li>
+                            <li class="dropdown active">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">Ferramentas <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li class="active">
+    <a href="./">Mecanismo de validação de dados</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="#" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li >
+                                <a rel="next" href="../..">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="disabled">
+                                <a rel="prev" >
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+                <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
+    <ul class="nav bs-sidenav">
+        <li class="main active"><a href="#mecanismo-de-validacao-de-dados">Mecanismo de validação de dados</a></li>
+            <li><a href="#sumario">Sumário</a></li>
+            <li><a href="#utilizacao">Utilização</a></li>
+            <li><a href="#sintaxe-das-regras">Sintaxe das regras</a></li>
+            <li><a href="#customizacao-de-mensagens">Customização de mensagens</a></li>
+            <li><a href="#regras-de-validacao">Regras de validação</a></li>
+            <li><a href="#metodos">Métodos</a></li>
+    </ul>
+</div></div>
+                <div class="col-md-9" role="main">
+
+<h1 id="mecanismo-de-validacao-de-dados">Mecanismo de validação de dados</h1>
+<p>Este validador foi inspirado no Validator utilizado pelo Laravel, mas sua implementação foi adaptada para atender as necessidades dos processos
+do sistema Receiv.</p>
+<h2 id="sumario">Sumário</h2>
+<ul>
+<li><a href="#validador-de-dados-da-receiv">Validador de dados da Receiv</a></li>
+<li><a href="#utilização">Utilização</a></li>
+<li><a href="#sintaxe-das-regras">Sintaxe das regras</a></li>
+<li><a href="#customização-de-mensagens">Customização de mensagens</a></li>
+<li><a href="#regras-de-validação">Regras de validação</a></li>
+<li><a href="#documentação">Documentação</a><ul>
+<li><a href="#validatearray-dados-array-regras">validate(array $dados, array $regras)</a></li>
+<li><a href="#fails">fails()</a></li>
+<li><a href="#setmsgstring-campo-array-regras">setMsg(string $campo, array $regras)</a></li>
+<li><a href="#getmessages">getMessages()</a></li>
+</ul>
+</li>
+</ul>
+<hr />
+<h2 id="utilizacao">Utilização</h2>
+<pre><code class="php">require_once &quot;vendor/autoload.php&quot;;
+
+use BWCS\Validator\Validator;
+
+// Instanciação do validador
+$validator = new Validator();
+
+// Executando a validação
+$validator-&gt;validate($_POST, [
+    'credor_id'     =&gt; 'required|integer|exists:tb_credor,credor_id|stop',
+    'email'         =&gt; 'required|email|unique:tb_usuario,e_mail|stop',
+    'password'      =&gt; 'required|confirmed|min:8',
+    'data_inicial'  =&gt; 'required|date_between:-30 days,-1 days'
+]);
+
+// Obtendo o resultado da validação e printando na tela
+if($validator-&gt;fails()) {
+    print_r($validator-&gt;getMessages());
+}
+</code></pre>
+
+<h2 id="sintaxe-das-regras">Sintaxe das regras</h2>
+<p>Um campo pode ter mais de uma regra, sendo separadas por um <em>| (pipe)</em>.</p>
+<p><strong>Ex.:</strong></p>
+<pre><code class="php">required|string|stop
+</code></pre>
+
+<p>Quando uma regra receber parametros, deverão vir após um <em>:</em> e os parâmetros deverão ser separados por vígula.
+<strong>Ex.:</strong></p>
+<pre><code class="php">required|integer|exists:tb_credor,credor_id
+</code></pre>
+
+<h2 id="customizacao-de-mensagens">Customização de mensagens</h2>
+<p>A customização de mensagem de erro de validação pode ser feita no método <a href="#setmsgstring-campo-array-regras">setMsg</a> podendo ser definidas mensagens específicas para cada tipo de erro.
+Caso haja mais de uma regra mas seja definida uma mensage customizada para apenas uma, as outras regras retornarão a mensagem de erro padrão.
+<strong>Obs.:</strong> O método <a href="#setmsgstring-campo-array-regras">setMsg</a> deve ser chamado antes do método <a href="#validatearray-dados-array-regras">validate</a>. 
+Ex.:</p>
+<pre><code class="php">$validator-&gt;setMsg('email', [
+    'required' =&gt; 'O e-mail deve ser informado',
+    'email'    =&gt; 'E-mail inválido',
+    'unique'   =&gt; 'Este e-mail não está disponível para registro'
+]);
+
+$validator-&gt;setMsg('nascimento', [
+    'date_between' =&gt; 'O dependente deve ter entre 12 e 18 anos de idade'
+]);
+
+$validator-&gt;validate($_POST, [
+    'email'      =&gt; 'required|email|unique:tb_usuario,e_mail|stop',
+    'nascimento' =&gt; 'required|date_between:-18 years,-12 years'
+]);
+</code></pre>
+
+<h2 id="regras-de-validacao">Regras de validação</h2>
+<table>
+<thead>
+<tr>
+<th>Regra</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>required</strong></td>
+<td>O campo deve existir e ter algum valor não nulo.</td>
+</tr>
+<tr>
+<td><strong>stop</strong></td>
+<td>Interrompe a execução das regras seguintes caso um campo não seja válido</td>
+</tr>
+<tr>
+<td><strong>integer</strong></td>
+<td>O campo deve ter um valor inteiro.</td>
+</tr>
+<tr>
+<td><strong>numeric</strong></td>
+<td>O campo deve ter um valor númerico.</td>
+</tr>
+<tr>
+<td><strong>bool</strong></td>
+<td>O campo deve um valor booleano. Os valores aceitos são true, false, 1, 0, "1", e "0".</td>
+</tr>
+<tr>
+<td><strong>checked</strong></td>
+<td>O campo deve ter um dos valores "yes", "on", true, "true", 1, "1".</td>
+</tr>
+<tr>
+<td><strong>not_checked</strong></td>
+<td>O campo pode ter um dos valores "yes", "on", true, "true", 1, "1".</td>
+</tr>
+<tr>
+<td><strong>alpha</strong></td>
+<td>Deve conter apenas caracteres alfabéticos</td>
+</tr>
+<tr>
+<td><strong>alpha_numeric</strong></td>
+<td>Deve conter apenas caracteres alfabéticos e numéricos</td>
+</tr>
+<tr>
+<td><strong>alpha_dash</strong></td>
+<td>Deve conter apenas caracteres alfabéticos, <strong>- (hífen)</strong> ou  <strong>_ (underscore)</strong></td>
+</tr>
+<tr>
+<td><strong>email</strong></td>
+<td>O campo deve ser um email válido</td>
+</tr>
+<tr>
+<td><strong>confirmed</strong></td>
+<td>O campo deve ter um campo de confirmação. O campo de confirmação deve ser o nome do campo principal seguido de <strong>_confirmation</strong></td>
+</tr>
+<tr>
+<td><strong>contains:<em>string</em></strong></td>
+<td>Valida se o valor do campo contém o uma <em>string</em></td>
+</tr>
+<tr>
+<td><strong>not_contains:<em>string</em></strong></td>
+<td>Valida se o valor do campo <strong>não</strong> contém o uma <em>string</em></td>
+</tr>
+<tr>
+<td><strong>json</strong></td>
+<td>Valida se o valor fornecido é um json válido</td>
+</tr>
+<tr>
+<td><strong>url</strong></td>
+<td>Valida se o valor fornecido é uma url válida</td>
+</tr>
+<tr>
+<td><strong>min:<em>valor</em></strong></td>
+<td>Se o valor do campo for numérico verifica se um valor do campo é maior ou igual o valor definido na regra. Se o valor do campo for uma string verifica se o compromento é maior ou igual o valor definido na regra</td>
+</tr>
+<tr>
+<td><strong>max:<em>valor</em></strong></td>
+<td>Se o valor do campo for numérico verifica se um valor do campo é menor ou igual o valor definido na regra. Se o valor do campo for uma string verifica se o compromento é menor ou igual o valor definido na regra</td>
+</tr>
+<tr>
+<td><strong>between:<em>min,max</em></strong></td>
+<td>Confere se o valor é maior ou igual a <em>min</em> e menor e igual a <em>max</em></td>
+</tr>
+<tr>
+<td><strong>date</strong></td>
+<td>Valida se o valor do campo é uma data válida no formato AAAA-MM-DD</td>
+</tr>
+<tr>
+<td><strong>date_format:<em>formato</em></strong></td>
+<td>Valida se o valor do campo é uma data válida no formato definindo. Internamente utiliza a função <a href="https://www.php.net/manual/en/function.strtotime">strtotime</a> do php então deve seguir os <a href="https://www.php.net/manual/en/datetime.formats.php">formatos suportados</a></td>
+</tr>
+<tr>
+<td><strong>before:<em>data</em></strong></td>
+<td>Confere se o valor do campo é uma data anterior à <em>data</em> definida na regra</td>
+</tr>
+<tr>
+<td><strong>after:<em>data</em></strong></td>
+<td>Confere se o valor do campo é uma data posterior à <em>data</em> definida na regra</td>
+</tr>
+<tr>
+<td><strong>date_between:<em>min,max</em></strong></td>
+<td>Valida se o valor do campo é uma data válida e em um determinado período</td>
+</tr>
+<tr>
+<td><strong>in:<em>Sim,Não,Talvez</em></strong></td>
+<td>Valida se o valor do campo está em uma lista de valores informados na regra</td>
+</tr>
+<tr>
+<td><strong>not_in:<em>Sim,Não,Talvez</em></strong></td>
+<td>Valida se o valor do campo <strong>não</strong> está em uma lista de valores informados na regra</td>
+</tr>
+<tr>
+<td><strong>exists:<em>table,column</em></strong></td>
+<td>Valida se o valor existe em uma coluna de uma tabela informados na regra.</td>
+</tr>
+<tr>
+<td><strong>unique:<em>table,column</em></strong></td>
+<td>O valor deve ser único na tabela/coluna informadas. Retorna inválido caso o valor do campo já exista.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="metodos">Métodos</h2>
+<h3 id="validatearray-dados-array-regras">validate(array $dados, array $regras)</h3>
+<p>Executa a validação baseada em uma lista de regras passada para cada campo.</p>
+<ul>
+<li><strong>dados</strong>(<em>array</em>): Lista de dados a serem validados com cada item no formato 'campo' =&gt; 'dados';</li>
+<li><strong>regras</strong>(<em>array</em>): Lista de regras de validação seguindo o formato 'campo' =&gt; 'regras';</li>
+</ul>
+<h3 id="fails">fails()</h3>
+<p>Retorna <em>true</em> se a validação ocorreu com algum erro.</p>
+<h3 id="setmsgstring-campo-array-regras">setMsg(string $campo, array $regras)</h3>
+<p>Define mensagens customizadas para cada tipo de erro em um campo.</p>
+<ul>
+<li><strong>campo</strong>(<em>array</em>): Campo ao qual a lista de mensagens será aplicada.</li>
+<li><strong>regras</strong>(<em>array</em>): Lista de de mensagens com cada item seguindo o formato 'regra' =&gt; 'Mensagem';</li>
+</ul>
+<h3 id="getmessages">getMessages()</h3></div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = "../..",
+                shortcuts = {"search": 83, "next": 78, "help": 191, "previous": 80};
+        </script>
+        <script src="../../js/base.js" defer></script>
+        <script src="../../search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="Search Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Search</h4>
+            </div>
+            <div class="modal-body">
+                <p>
+                    From here you can search these documents. Enter
+                    your search terms below.
+                </p>
+                <form role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="Keyboard Shortcuts Modal" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="exampleModalLabel">Keyboard Shortcuts</h4>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
