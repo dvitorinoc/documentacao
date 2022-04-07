@@ -1,6 +1,1 @@
 site_name: Receiv Docs
-theme:
-  name: mkdocs
-  custom_dir: receiv/
-  locale: pt
-extra_css: [extra.css]
